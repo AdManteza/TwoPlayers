@@ -1,66 +1,52 @@
-@Player1_lives = 3
-@Player2_lives = 3
+require_relative '2players_classes.rb'
+require 'colorize'
 
-def display_score
-  p "Player1 available lives: #{@Player1_lives}"
-  p "Player2 available lives: #{@Player2_lives}"
+reply = " "
+
+def valid_input?(input)
+  input == 'y' || input == 'n'
 end
 
-def generate_number
-  @num1 = rand(1..20)
-  @num2 = rand(1..20)
+loop do 
+  puts "Want to see who is better at Math? (y/n)"
+  reply = gets.chomp.downcase
+
+  break if valid_input?(reply)
+  puts "Invalid Input!!".colorize(:yellow)
 end
 
-def verify_answer?
-  @expected_answer = @num1 + @num2
-  if @answer == @expected_answer
-    true
-  else
-    false
-  end
-end
+exit if reply == 'n'  
 
-def player1
-  puts "Player 1 it's your turn to answer"
-  @answer = gets.chomp.to_i
-  if !verify_answer?
-    @Player1_lives -= 1
-    display_score
-  end
-end
+puts "Who should play first? Give me a mathematician's name"
+player1 = gets.chomp
 
-def player2
-  puts "Player 2 it's your turn to answer"
-  @answer = gets.chomp.to_i
-  if !verify_answer?
-    @Player2_lives -= 1
-    display_score
-  end
-end
+puts "Who should challenge #{player1}? Give me a mathematician's name"
+player2 = gets.chomp
 
-def announce_winner
-  if @Player2_lives == 0
-    puts "Player 1 wins!"
-  else
-    puts "Player 2 wins"
-  end
-end
+game = Game.new(player1, player2)
+puts game.display_current_players
+puts " "
 
 loop do
-  generate_number
-  p "What does #{@num1} plus #{@num2} equal?"
-  player1
-  break if @Player1_lives == 0 
-  player2
-  break if @Player2_lives == 0
+  game.reset_player_lives
+
+  loop do # question loop
+    puts game.ask_a_question.colorize(:green)
+    game.get_players_answer
+    puts game.display_players_answer.colorize(:blue)
+    game.evaluate_answer
+    puts game.display_player_status
+    break if game.no_more_lives?
+  end
+  
+  loop do
+    puts "Continue? (y/n)"
+    reply = gets.chomp.downcase
+    break if valid_input?(reply)
+    puts "Invalid Input".colorize(:yellow)
+  end
+
+  break if reply == 'n'
 end
 
-announce_winner
-
-
-
-
-
-
-
-
+puts "A total of #{Question.return_number_of_questions} questions were asked"
